@@ -49,6 +49,7 @@ app.post("/upload", upload.single('image'), async (req, res) => {
   const file = req.file;
   const fileName = file.originalname;
   const fileContent = file.data;
+  console.log("File Name: " + fileName);
 
   const params = {
     Bucket: process.env.BUCKET_NAME,
