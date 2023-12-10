@@ -1,0 +1,14 @@
+{
+  "name": "s3-try",
+  "version": "1.0.0",
+  "description": "trying to upload images from web to an s3 bucket",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "s3"
+  ],
+  "author": "theunconcernedape",
+  "license": "GPL-2.0-only"
+}
