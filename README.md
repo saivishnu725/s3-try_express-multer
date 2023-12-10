@@ -11,7 +11,11 @@
 2. Save your aws configuration settings in the `.env` file.
 
    Requirements:
-
+    
+    - BUCKET_NAME
+    - BUCKET_REGION
+    - ACCESS_KEY
+    - SECRET_ACCESS_KEY
 
 3. Install node dependencies
 
