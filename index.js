@@ -1,11 +1,12 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 import dotenv from "dotenv";
 import express from "express";
 import multer from "multer";
+import fs from 'fs';
 
 // use multer
-const storage = multer.memoryStorage()
-const upload = multer({ storage: storage })
+const upload = multer({ dest: 'uploads/' });
 
 // use env vars
 dotenv.config();
@@ -44,28 +45,32 @@ app.get("/", (req, res) => {
 // route: POST /upload
 app.post("/upload", upload.single('image'), async (req, res) => {
   console.log(req.file);
-  console.log("Name: " + req.file.originalname);
-  console.log(req.body);
-  const file = req.file;
-  const fileName = file.originalname;
-  const fileContent = file.data;
-  console.log("File Name: " + fileName);
-
-  const params = {
-    Bucket: process.env.BUCKET_NAME,
-    Key: fileName,
-    Body: fileContent,
-    ContentType: req.file.mimetype
-  };
-
-
+  const fileStream = fs.createReadStream(req.file.path);
+  const stats = fs.statSync(req.file.path);
+  const fileSize = stats.size;
   try {
-    const data = await s3.send(new PutObjectCommand(params));
-    console.log(`File uploaded successfully. URL: ${data.Location}`);
-    // Save the URL in your database or use it as needed
+    const upload = new Upload({
+      client: s3,
+      params: {
+        Bucket: process.env.BUCKET_NAME,
+        Key: req.file.originalname,
+        Body: fileStream,
+        ContentLength: fileSize,
+      },
+      queueSize: 4, // Number of concurrent uploads (optional, default is 4)
+    });
+
+    await upload.done(); // Waits for the upload to finish
+
+    console.log(`File uploaded successfully.`);
+
+    // Clean up: delete the temporary file after upload
+    fs.unlinkSync(req.file.path);
+
+    res.redirect("/");
   } catch (err) {
     console.error(err);
-    // Handle upload error
+    res.status(500).send("Error uploading file.");
   }
 
   res.redirect("/");
